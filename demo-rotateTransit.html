@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>转盘</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0
+        }
+        
+        body {
+            text-align: center
+        }
+        
+        .ly-plate {
+            position: relative;
+            width: 509px;
+            height: 509px;
+            margin: 50px auto;
+        }
+        
+        .rotate-bg {
+            width: 509px;
+            height: 509px;
+            background: url(./imgs/ly-plate.png);
+            position: absolute;
+            top: 0;
+            left: 0
+        }
+        
+        .ly-plate div.lottery-star {
+            width: 214px;
+            height: 214px;
+            position: absolute;
+            top: 150px;
+            left: 147px;
+            outline: none
+        }
+        
+        .ly-plate div.lottery-star #lotteryBtn {
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            left: 0;
+            *left: -107px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ly-plate">
+        <div class="rotate-bg"></div>
+        <div class="lottery-star"><img id="lotteryBtn" src="./imgs/rotate-static.png"></div>
+    </div>
+</body>
+<script src="./lib/jquery-1.7.2.min.js"></script>
+<script src="./lib/jquery.transit.min.js"></script>
+<script>
+	$(function(){
+		var lottery = new Lottery({
+			lotteryBtn: 'lotteryBtn'
+		});
+		lottery.fInit();
+	});
+    //options{lotteryBtn}
+    function Lottery(options) {
+		console.log(options)
+        this.lotteryBtn = $('#' + options.lotteryBtn);
+		this.curAngle = 0;
+    }
+    Lottery.prototype = {
+        fInit: function() {
+			var self = this;
+            this.lotteryBtn.on('click',function(){
+				self.fGetAwardDebounce();
+			});
+        },
+        fGetAward: function() {
+			console.log('get award')
+			//get award from backend
+			//generate random awrad
+            var time = [0, 1, 2, 3, 4,5,6,7,8,9,10];
+            time = time[Math.floor(Math.random() * time.length)];
+            if (time == 0) {
+                alert('网络超时');
+            }
+            else{
+                var data = [1, 2, 3, 0]; //返回的数组
+                data = data[Math.floor(Math.random() * data.length)];
+                if (data == 1) {
+                    this.fRotate(1, '恭喜您抽中的一等奖')
+                }
+                if (data == 2) {
+                    this.fRotate(2, '恭喜您抽中的二等奖')
+                }
+                if (data == 3) {
+                    this.fRotate(3, '恭喜您抽中的三等奖')
+                }
+                if (data == 0) {
+                    var award = [4,5,6,7,8];
+                    award = award[Math.floor(Math.random() * award.length)]
+                    this.fRotate(award, '很遗憾，这次您未抽中奖');
+                }
+            }
+        },
+        fRotate: function(nAward,text) {
+			var map = {
+				1: 157,
+				2: 247,
+				3: 22,
+				4: 67,
+				5: 112,
+				6: 202,
+				7: 292,
+				8: 337
+			}
+			var angle = map[nAward],
+				baseAngle = 360 * 4,
+				offsetAngle = angle - this.curAngle,
+				targetAngle = offsetAngle > 0 ? offsetAngle : 360 + offsetAngle;
+				console.log('award ' + nAward + ' angle ' + angle + 'offsetAngle ' + offsetAngle + 'targetAngle ' + targetAngle)
+			this.lotteryBtn.transition({
+                rotate: '+=' + (targetAngle + baseAngle)
+			},3000,'ease-in-out',function(){
+				alert(text);
+			});
+			this.curAngle = angle;
+			console.log('curAngle ' + this.curAngle)			
+        }
+    }
+    Lottery.prototype.fGetAwardDebounce = debounce(Lottery.prototype.fGetAward,300);
+	
+    function debounce(fn,delay){
+		var timer;
+		return function(){
+			var ctx = this,args = arguments;
+			clearTimeout(timer);
+			timer = setTimeout(function(){
+				fn.apply(ctx,args);
+			},delay);
+		}
+	}
+</script>
+
+</html>
