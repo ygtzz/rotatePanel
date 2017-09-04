@@ -1,2 +1,3 @@
-# rotatePanel
-a panel rotate animation
+## rotatePanel
+
+转盘抽奖例子
